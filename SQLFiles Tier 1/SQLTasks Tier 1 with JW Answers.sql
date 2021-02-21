@@ -147,15 +147,30 @@ QUESTIONS:
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
 
-STUCK!!!!
-SELECT name, revenue
-        FROM(
-        SELECT name,SUM(membercost+guestcost)*slots AS revenue
-        FROM Facilities
-        INNER JOIN Bookings
-        ON Facilities.facid = Bookings.facid
-        WHERE revenue < 1000) AS subquery
-        GROUP BY name
+FROM HELP
+
+           SELECT *
+  FROM (
+        SELECT 
+	    sub.facility,
+        SUM(sub.revenue) AS total_revenue
+       		FROM (
+                  SELECT 
+                  Facilities.name AS facility,
+                  CASE WHEN Bookings.memid = '0' THEN Bookings.slots * Facilities.guestcost 
+	   			  ELSE Bookings.slots * Facilities.membercost END AS revenue
+                  	FROM Bookings
+	   	 		  	LEFT JOIN Members
+	   			  	ON Bookings.memid = Members.memid
+	   		 	  	LEFT JOIN Facilities 
+	   			  	ON Bookings.facid = Facilities.facid
+                 ) sub
+      
+   	    GROUP BY sub.facility
+       ) sub2
+WHERE sub2.total_revenue < 1000
+ORDER BY sub2.total_revenue DESCd = Bookings.facid
+            GROUP BY name
 
 /* Q11: Produce a report of members and who recommended them in alphabetic surname,firstname order */
 
@@ -174,8 +189,19 @@ SELECT name, revenue
        ON Bookings.memid = Members.memid
        WHERE Members.memid != 0
 
-/* Q13: Find the facilities usage by  , but not guests */
+/* Q13: Find the facilities usage by  members, but not guests */
 
-STUCK!!!!
+FROM HELP
+
+
+SELECT f.name AS facility, SUM(b.slots) AS total_mem_slots, strftime('%m', b.starttime) AS month
+        FROM Facilities AS f 
+        INNER JOIN Bookings as b 
+        ON b.facid = f.facid
+        INNER JOIN Members as m
+        ON b.memid = m.memid
+        WHERE b.memid > 0 
+        GROUP BY facility, month
+        ORDER BY facility;
        
         
